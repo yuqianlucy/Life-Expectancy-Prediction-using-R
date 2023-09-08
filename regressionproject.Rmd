@@ -1,0 +1,539 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+# getting a basic summary for the project dataset
+
+
+
+
+
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(statsr)
+library(gridExtra)
+library(knitr)
+```
+
+
+```{r}
+install.packages("statsr")
+```
+
+```{r}
+Life_Expantancy_data <- read.csv("C:/Users/yuqia/Desktop/Life Expectancy Data.csv")
+```
+```{r}
+Life_Expantancy_data
+```
+
+```{r}
+head(Life_Expantancy_data)
+```
+#getting the basic summary of the datset
+```{r}
+summary(Life_Expantancy_data)
+```
+
+```{r}
+# remove na in r - remove rows - na.omit function / option
+clean_data <- na.omit(Life_Expantancy_data) 
+```
+
+
+```{r}
+clean_data
+```
+
+
+
+
+#Exploratory data Analysis
+#1. checking the distribution of target variable
+```{r}
+library(ggplot2)
+
+```
+#Building the histogram 
+```{r}
+ggplot(data=clean_data,aes(clean_data$Life.expectancy))+geom_histogram(aes(y=..density..),fill="orange")+geom_density()
+```
+
+#Checking distribution for the predictor variables
+
+```{r}
+ggplot(data=clean_data,aes(clean_data$Alcohol))+geom_histogram(aes(y=..density..),fill="orange")+geom_density()
+```
+#getting the distribuition for adult morality
+
+```{r}
+ggplot(data=clean_data,aes(clean_data$Adult.Mortality))+geom_histogram(aes(y=..density..),fill="orange")+geom_density()
+```
+#getting the distribution for infant death
+
+```{r}
+ggplot(data=clean_data,aes(clean_data$infant.deaths))+geom_histogram(aes(y=..density..),fill="orange")+geom_density()
+```
+#getting distribution for HIV
+```{r}
+ggplot(data=clean_data,aes(clean_data$HIV.AIDS))+geom_histogram(aes(y=..density..),fill="orange")+geom_density()
+```
+#getting distribution for Polio
+```{r}
+ggplot(data=clean_data,aes(clean_data$Polio))+geom_histogram(aes(y=..density..),fill="orange")+geom_density()
+```
+#getting distibution for thinness..10 to 19.years
+
+```{r}
+ggplot(data=clean_data,aes(clean_data$thinness..1.19.years))+geom_histogram(aes(y=..density..),fill="orange")+geom_density()
+```
+#getting distribution for percentage expenditure
+```{r}
+ggplot(data=clean_data,aes(clean_data$percentage.expenditure))+geom_histogram(aes(y=..density..),fill="orange")+geom_density()
+```
+#getting distribution for under five death
+
+```{r}
+ggplot(data=clean_data,aes(clean_data$under.five.deaths))+geom_histogram(aes(y=..density..),fill="orange")+geom_density()
+```
+
+#According to the above graph, the Life_expantancy variable follow a little bit sked to the left distributions.it is not as normal as I expepected.
+
+# check correlations of the target variable with the first 5 predictors using Pearson correlation
+```{r}
+library(psych)
+```
+
+```{r}
+
+pairs.panels(clean_data[,4:9], 
+             method = "pearson", # correlation method
+             hist.col = "green",
+             density = TRUE,  # show density plots
+             ellipses = TRUE # show correlation ellipses
+)
+
+```
+```{r}
+pairs.panels(clean_data[,c(4,10:14)], 
+             method = "pearson", # correlation method
+             hist.col = "green",
+             density = TRUE,  # show density plots
+             ellipses = TRUE # show correlation ellipses
+)
+```
+```{r}
+pairs.panels(clean_data[,c(4,15:19)], 
+             method = "pearson", # correlation method
+             hist.col = "green",
+             density = TRUE,  # show density plots
+             ellipses = TRUE # show correlation ellipses
+)
+
+```
+```{r}
+pairs.panels(clean_data[,c(4,20:22)], 
+             method = "pearson", # correlation method
+             hist.col = "green",
+             density = TRUE,  # show density plots
+             ellipses = TRUE # show correlation ellipses
+)
+```
+#following the rule
+#Negligible correlation = 0.00 - 0.09
+#Weak correlation = 0.10 - 0.39
+#Moderate correlation = 0.40 - 0.69
+#Strong correlation = 0.70 - 0.89
+#Very strong correlation = 0.90 - 1.00
+
+
+
+# By checking the correlation, we can observe that income.composition of resources, scholling, and adult morality have a strong correlation iwth the target variable life exptancy
+
+#By checking the correlation, we can observe that BMI, HIV.AIDS, Diphtheria, thinness..1.19.years, Polio, thinness.5.9.years, and GDP have a moderate correlation with the target variable life exptancy
+
+#By checking the correlation, we can observe that Alcohol, percentage.expenditure, under.five.deaths, Total.expenditure, and infant.deaths have a weak correlation with the target variable life exptancy,
+
+#By checking the correlation, we can observe that Hepatitis.B, Measles, and Population have extremely weak correlation with the target variable life exptancy.
+
+
+
+
+#Doing modleing and predictions
+# First steps: We should oberve the null model
+#building the null model
+```{r}
+nullmodel<-lm(Life.expectancy~1,data=clean_data)
+```
+
+#Getting the summary of the null model
+```{r}
+summary(nullmodel)
+```
+
+
+#make predictions
+```{r}
+nullmodelpredicts<-predict(nullmodel,  # my model
+                    newdata = clean_data, # dataset
+                    type = "response") # to get predicted valu
+```
+
+
+```{r}
+nullmodelpredicts
+```
+#Second, let us observe the full model
+#Building the full model
+```{r}
+fullmodel<-lm(Life.expectancy~.,data=clean_data)
+```
+#getting the summary of the full model
+```{r}
+summary(fullmodel)
+```
+
+#Make prediction based on the full model
+```{r}
+fullmodelPreds <- predict(fullmodel,  # my model
+                    newdata = clean_data, # dataset
+                    type = "response")
+
+```
+#Getting the predictions
+```{r}
+fullmodelPreds
+```
+#doing the backward step model
+```{r}
+BackwardStepModel <- step(fullmodel,
+                      direction = "backward")
+```
+#getting the summary of the backwardstepmodel
+```{r}
+summary(BackwardStepModel)
+```
+
+
+
+
+
+#Make the predictions for the backwardstep 
+```{r}
+BackwardStepModelPreds <- predict(BackwardStepModel,  # my model
+                    newdata = clean_data, # dataset
+                    type = "response") # to get predicted values
+```
+
+#show the backward predictions
+```{r}
+BackwardStepModelPreds
+```
+#Doing the forward model selections
+
+```{r}
+forwardStepModel <- step(nullmodel,
+                         direction="forward",
+                         scope=list(lower=nullmodel,
+                                    upper=fullmodel))
+```
+
+#Getting the summary of the forward method
+```{r}
+summary(forwardStepModel)
+```
+#make the predictions
+```{r}
+forwardStepModelPreds <- predict(forwardStepModel,  # my model
+                    newdata = clean_data, # dataset
+                    type = "response") # to get predicted values
+```
+
+#showing the prediction
+```{r}
+forwardStepModelPreds
+```
+
+#Checking the assumption for normality fr different models
+```{r}
+par(mfrow = c(3, 2))
+plot(density(fullmodel$residuals))
+plot(density(nullmodel$residuals))
+plot(density(BackwardStepModel$residuals))
+plot(density(forwardStepModel$residuals))
+
+```
+#checking the null model assumption plot
+```{r}
+par(mfrow = c(2, 2))
+plot(nullmodel)
+```
+#checking assumtion for the full model
+```{r}
+par(mfrow = c(2, 2))
+plot(fullmodel)
+```
+#checking the assumption for the
+```{r}
+par(mfrow = c(2, 2))
+plot(BackwardStepModel)
+```
+
+
+#checking assumotion for the forward model
+```{r}
+par(mfrow = c(2, 2))
+plot(forwardStepModel)
+```
+# Getting the adjusted R-squared for different model
+```{r}
+summary(fullmodel)$adj.r.squared
+summary(nullmodel)$adj.r.squared 
+summary(BackwardStepModel)$adj.r.squared 
+summary(forwardStepModel)$adj.r.squared 
+
+```
+#loading the library
+```{r}
+library(Matrix)
+```
+
+
+# The backward methods is always the key, decided to make transformation to normalized that model
+```{r}
+original_model<-Life.expectancy ~ Country + Year + infant.deaths + Alcohol + 
+    Hepatitis.B + under.five.deaths + HIV.AIDS + thinness.5.9.years + 
+    Income.composition.of.resources + Schooling
+```
+
+
+```{r}
+new_model1<-lm(log(Life.expectancy )~ Country + Year + infant.deaths + log(Alcohol) + 
+    Hepatitis.B + under.five.deaths + HIV.AIDS + thinness.5.9.years + 
+    Income.composition.of.resources + Schooling,data=Life_Expantancy_data)
+```
+
+```{r}
+new_model1
+```
+
+```{r}
+summary(new_model1)
+```
+
+```{r}
+par(mfrow = c(2, 2))
+plot(new_model1)
+```
+
+
+#First, Identify outliers
+```{r}
+boxplot(clean_data$Life.expectancy,plot=FALSE)$out
+```
+#Save the outliers in a vectors
+```{r}
+outliers <- boxplot(clean_data$Life.expectancy, plot=FALSE)$out
+
+```
+
+```{r}
+install.packages("CRAN")
+
+```
+
+```{r}
+library(CRAN)
+```
+
+```{r}
+clean_data[which(clean_data$Life.expectancy %in% outliers),]
+```
+# removing the row contain outliers
+```{r}
+clean_data1 <- clean_data[-which(clean_data$Life.expectancy %in% outliers),]
+```
+
+```{r}
+boxplot(clean_data$Life.expectancy)
+```
+
+
+
+```{r}
+new_model2<-lm(Life.expectancy~ Country + Year + infant.deaths + Alcohol + 
+    Hepatitis.B + under.five.deaths + HIV.AIDS + thinness.5.9.years + 
+    Income.composition.of.resources + Schooling,data=clean_data1)
+```
+
+
+```{r}
+par(mfrow = c(2, 2))
+plot(new_model2)
+```
+# USing only the model who have strong correlations with the response variable life.Exptancy
+```{r}
+
+model3 <- lm(Life.expectancy ~ Schooling +  Adult.Mortality + Income.composition.of.resources,
+                data = clean_data)
+
+
+```
+
+#getting the summary for model3
+```{r}
+summary(model3)
+```
+
+
+```{r}
+par(mfrow = c(2, 2))
+plot(model3)
+```
+
+
+```{r}
+Model3Preds <- predict(model3,  # my model
+                    newdata = clean_data, # dataset
+                    type = "response") # to get predicted values
+```
+
+#showing the prediction of model 3
+```{r}
+Model3Preds
+```
+# lastly, let us check the colinearity fr different model
+
+#check collinearity of the backward Model
+```{r}
+library(car)
+```
+
+```{r}
+vif(BackwardStepModel)
+```
+
+#checking the collineairty for the forward model
+```{r}
+vif(forwardStepModel)
+```
+#Checking the collineairty for the model3
+```{r}
+vif(model3)
+```
+
+#Getting the Anova table for model 3
+```{r}
+anova(lm(Life.expectancy ~ Schooling + Adult.Mortality + 
+    Income.composition.of.resources, data = clean_data))
+
+```
+```{r}
+install.packages("sjPlot")
+```
+
+```{r}
+install.packages("sjmisc")
+```
+
+```{r}
+install.packages("sjlabelled")
+```
+
+```{r}
+library(sjPlot)
+library(sjmisc)
+library(sjlabelled)
+
+```
+
+
+
+```{r}
+tablemodel<-tab_model(model3)
+```
+
+
+```{r}
+tablemodel
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+
